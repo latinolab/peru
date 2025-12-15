@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>LatinoLab 2025 - Software para Laboratorios</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              brand: { 50: '#f0fdfa', 100: '#ccfbf1', 500: '#14b8a6', 600: '#0d9488', 700: '#0f766e', 900: '#134e4a' },
+              teal: { 50: '#f0fdfa', 100: '#ccfbf1', 400: '#2dd4bf', 500: '#14b8a6', 600: '#0d9488', 700: '#0f766e', 900: '#134e4a' }
+            },
+            fontFamily: { sans: ['Inter', 'sans-serif'] },
+            animation: {
+              'blob': 'blob 7s infinite',
+              'fade-in-up': 'fadeInUp 0.8s ease-out forwards',
+            },
+            keyframes: {
+              blob: {
+                '0%': { transform: 'translate(0px, 0px) scale(1)' },
+                '33%': { transform: 'translate(30px, -50px) scale(1.1)' },
+                '66%': { transform: 'translate(-20px, 20px) scale(0.9)' },
+                '100%': { transform: 'translate(0px, 0px) scale(1)' },
+              },
+              fadeInUp: {
+                '0%': { opacity: '0', transform: 'translateY(20px)' },
+                '100%': { opacity: '1', transform: 'translateY(0)' },
+              }
+            }
+          }
+        }
+      }
+    </script>
+    
+    <!-- Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Import Map for Gemini SDK -->
+    <script type="importmap">
+{
+  "imports": {
+    "@google/genai": "https://esm.sh/@google/genai@^1.33.0",
+    "react": "https://esm.sh/react@^19.2.3",
+    "lucide-react": "https://esm.sh/lucide-react@^0.561.0",
+    "react/": "https://esm.sh/react@^19.2.3/"
+  }
+}
+</script>
+
+    <style>
+      body { font-family: 'Inter', sans-serif; }
+      .no-scrollbar::-webkit-scrollbar { display: none; }
+      .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+      
+      /* Animation Utility Classes */
+      .reveal { opacity: 0; transform: translateY(30px); transition: all 0.8s ease-out; }
+      .reveal.active { opacity: 1; transform: translateY(0); }
+    </style>
+<link rel="stylesheet" href="/index.css">
+</head>
+<body class="bg-slate-50 text-slate-900 overflow-x-hidden relative">
+
+    <!-- Navbar -->
+    <nav id="navbar" class="fixed w-full z-50 transition-all duration-300 py-6 bg-transparent">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center">
+                <a href="#inicio" class="flex items-center space-x-2 group">
+                    <div class="bg-teal-600 p-2 rounded-lg text-white group-hover:scale-110 transition-transform">
+                        <i data-lucide="laptop"></i>
+                    </div>
+                    <div class="flex flex-col">
+                        <span id="nav-logo-text" class="text-xl font-bold leading-none text-white transition-colors">
+                            RIOSOFT<span class="text-teal-400">PERU</span>
+                        </span>
+                        <span id="nav-sub-text" class="text-xs font-semibold tracking-wider text-slate-200 transition-colors">
+                            LATINOLAB 2025
+                        </span>
+                    </div>
+                </a>
+
+                <!-- Desktop Menu -->
+                <div class="hidden md:flex space-x-8 items-center">
+                    <a href="#inicio" class="nav-link text-sm font-semibold text-slate-100 hover:text-white transition-colors">Inicio</a>
+                    <a href="#servicios" class="nav-link text-sm font-semibold text-slate-100 hover:text-white transition-colors">Ventajas</a>
+                    <a href="#productos" class="nav-link text-sm font-semibold text-slate-100 hover:text-white transition-colors">Precio</a>
+                    <a href="#nosotros" class="nav-link text-sm font-semibold text-slate-100 hover:text-white transition-colors">Nosotros</a>
+                    <a href="#contacto" class="nav-link text-sm font-semibold text-slate-100 hover:text-white transition-colors">Contacto</a>
+                    <a href="https://wa.me/51933126365" target="_blank" class="bg-teal-600 hover:bg-teal-700 text-white px-5 py-2 rounded-full text-sm font-bold transition-transform transform hover:scale-105 shadow-lg">
+                        Solicitar Demo
+                    </a>
+                </div>
+
+                <!-- Mobile Menu Button -->
+                <button id="mobile-menu-btn" class="md:hidden text-white p-2">
+                    <i data-lucide="menu" id="menu-icon"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Dropdown -->
+        <div id="mobile-menu" class="hidden absolute top-full left-0 w-full bg-white shadow-xl border-t border-slate-100">
+            <div class="px-4 pt-2 pb-6 space-y-2 flex flex-col">
+                <a href="#inicio" class="mobile-link px-3 py-3 text-base font-medium text-slate-700 hover:bg-slate-50 rounded-md">Inicio</a>
+                <a href="#servicios" class="mobile-link px-3 py-3 text-base font-medium text-slate-700 hover:bg-slate-50 rounded-md">Ventajas</a>
+                <a href="#productos" class="mobile-link px-3 py-3 text-base font-medium text-slate-700 hover:bg-slate-50 rounded-md">Precio</a>
+                <a href="#nosotros" class="mobile-link px-3 py-3 text-base font-medium text-slate-700 hover:bg-slate-50 rounded-md">Nosotros</a>
+                <a href="#contacto" class="mobile-link px-3 py-3 text-base font-medium text-slate-700 hover:bg-slate-50 rounded-md">Contacto</a>
+                <a href="https://wa.me/51933126365" target="_blank" class="text-center mt-4 bg-teal-600 text-white px-4 py-3 rounded-lg font-bold">Solicitar Demo en WhatsApp</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="inicio" class="relative h-screen flex items-center justify-center overflow-hidden">
+        <div class="absolute inset-0 z-0">
+            <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=1920&auto=format&fit=crop" class="w-full h-full object-cover" alt="Background">
+            <div class="absolute inset-0 bg-gradient-to-r from-slate-900/95 to-teal-900/80"></div>
+        </div>
+
+        <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center sm:text-left pt-20">
+            <div class="sm:max-w-2xl reveal active">
+                <div class="flex items-center justify-center sm:justify-start space-x-2 mb-6">
+                    <span class="inline-block py-1 px-3 rounded-full bg-teal-500/20 border border-teal-400 text-teal-300 text-xs font-semibold uppercase tracking-wider">
+                        Versión 100% Peruana 🇵🇪
+                    </span>
+                </div>
+                <h1 class="text-4xl sm:text-6xl font-extrabold text-white tracking-tight leading-tight mb-6 drop-shadow-lg">
+                    Control Interno Total para tu <span class="text-teal-400">Laboratorio Clínico</span>
+                </h1>
+                <p class="text-lg sm:text-xl text-slate-300 mb-8 leading-relaxed max-w-lg">
+                    Olvídate del Excel y las libretas. <strong>LATINOLAB 2025</strong> es el software de pago único que funciona sin internet. Ideal para emprendedores y laboratorios medianos.
+                </p>
+                
+                <div class="flex flex-wrap gap-3 mb-8 text-slate-300 text-sm font-medium justify-center sm:justify-start">
+                    <div class="flex items-center"><i data-lucide="check-circle" class="w-4 h-4 text-teal-400 mr-1"></i> Sin pagos mensuales</div>
+                    <div class="flex items-center"><i data-lucide="wifi-off" class="w-4 h-4 text-teal-400 mr-1"></i> Sin Internet</div>
+                    <div class="flex items-center"><i data-lucide="shield-check" class="w-4 h-4 text-teal-400 mr-1"></i> Soporte Garantizado</div>
+                </div>
+
+                <div class="flex flex-col sm:flex-row gap-4 justify-center sm:justify-start">
+                    <a href="#productos" class="flex items-center justify-center px-8 py-4 text-base font-bold rounded-lg text-white bg-teal-600 hover:bg-teal-700 transition-all hover:scale-105 shadow-lg shadow-teal-500/30">
+                        Ver Precio y Versión <i data-lucide="arrow-right" class="ml-2 h-5 w-5"></i>
+                    </a>
+                    <a href="#contacto" class="flex items-center justify-center px-8 py-4 text-base font-bold rounded-lg text-white border-2 border-slate-400 hover:bg-white/10 transition-all">
+                        Contáctanos
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce text-slate-400">
+            <i data-lucide="chevron-down" class="w-8 h-8"></i>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section id="servicios" class="py-24 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16 reveal">
+                <h2 class="text-base text-teal-600 font-semibold tracking-wide uppercase">Ventajas del Sistema</h2>
+                <p class="mt-2 text-3xl leading-8 font-extrabold tracking-tight text-slate-900 sm:text-4xl">
+                    Optimiza tu Laboratorio
+                </p>
+                <p className="mt-4 max-w-2xl text-xl text-slate-500 mx-auto">
+                    Imagina una herramienta informática versátil que se convierte en el corazón de tu operación diaria.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4 mb-16">
+                <!-- Card 1 -->
+                <div class="reveal relative group bg-slate-50 p-6 rounded-2xl hover:bg-teal-600 transition-colors duration-300 hover:-translate-y-2 hover:shadow-xl border border-slate-100">
+                    <div class="absolute -top-6 left-6 bg-teal-600 group-hover:bg-white p-4 rounded-xl shadow-lg transition-colors">
+                        <i data-lucide="credit-card" class="h-8 w-8 text-white group-hover:text-teal-600 transition-colors"></i>
+                    </div>
+                    <div class="pt-8">
+                        <h3 class="text-xl font-bold text-slate-900 group-hover:text-white mb-3">Pago Único</h3>
+                        <p class="text-slate-500 group-hover:text-teal-100 text-sm leading-relaxed">Sin costos adicionales, ni mensualidades. Licencia de por vida para tu computadora.</p>
+                    </div>
+                </div>
+                <!-- Card 2 -->
+                <div class="reveal relative group bg-slate-50 p-6 rounded-2xl hover:bg-teal-600 transition-colors duration-300 hover:-translate-y-2 hover:shadow-xl border border-slate-100" style="transition-delay: 100ms;">
+                    <div class="absolute -top-6 left-6 bg-teal-600 group-hover:bg-white p-4 rounded-xl shadow-lg transition-colors">
+                        <i data-lucide="wifi-off" class="h-8 w-8 text-white group-hover:text-teal-600 transition-colors"></i>
+                    </div>
+                    <div class="pt-8">
+                        <h3 class="text-xl font-bold text-slate-900 group-hover:text-white mb-3">Sin Internet</h3>
+                        <p class="text-slate-500 group-hover:text-teal-100 text-sm leading-relaxed">Trabaja sin interrupciones donde sea. Independencia total de la red.</p>
+                    </div>
+                </div>
+                <!-- Card 3 -->
+                <div class="reveal relative group bg-slate-50 p-6 rounded-2xl hover:bg-teal-600 transition-colors duration-300 hover:-translate-y-2 hover:shadow-xl border border-slate-100" style="transition-delay: 200ms;">
+                    <div class="absolute -top-6 left-6 bg-teal-600 group-hover:bg-white p-4 rounded-xl shadow-lg transition-colors">
+                        <i data-lucide="settings" class="h-8 w-8 text-white group-hover:text-teal-600 transition-colors"></i>
+                    </div>
+                    <div class="pt-8">
+                        <h3 class="text-xl font-bold text-slate-900 group-hover:text-white mb-3">Gestión Integral</h3>
+                        <p class="text-slate-500 group-hover:text-teal-100 text-sm leading-relaxed">Pacientes, médicos, comisiones, caja diaria y stock de reactivos.</p>
+                    </div>
+                </div>
+                <!-- Card 4 -->
+                <div class="reveal relative group bg-slate-50 p-6 rounded-2xl hover:bg-teal-600 transition-colors duration-300 hover:-translate-y-2 hover:shadow-xl border border-slate-100" style="transition-delay: 300ms;">
+                    <div class="absolute -top-6 left-6 bg-teal-600 group-hover:bg-white p-4 rounded-xl shadow-lg transition-colors">
+                        <i data-lucide="file-text" class="h-8 w-8 text-white group-hover:text-teal-600 transition-colors"></i>
+                    </div>
+                    <div class="pt-8">
+                        <h3 class="text-xl font-bold text-slate-900 group-hover:text-white mb-3">Reportes PDF</h3>
+                        <p class="text-slate-500 group-hover:text-teal-100 text-sm leading-relaxed">Formatos A4, A5 o Ticket. Envía resultados por correo o WhatsApp.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Extra Features -->
+            <div class="reveal bg-slate-50 rounded-3xl p-8 border border-slate-200">
+                <h3 class="text-2xl font-bold text-slate-900 mb-6 text-center">Más funcionalidades incluidas</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div class="flex items-center space-x-3 bg-white p-4 rounded-xl shadow-sm">
+                        <i data-lucide="users" class="text-teal-500"></i>
+                        <span class="text-slate-700 font-medium text-sm">Usuarios Ilimitados</span>
+                    </div>
+                    <div class="flex items-center space-x-3 bg-white p-4 rounded-xl shadow-sm">
+                        <i data-lucide="database" class="text-teal-500"></i>
+                        <span class="text-slate-700 font-medium text-sm">Backup Local/Nube</span>
+                    </div>
+                    <div class="flex items-center space-x-3 bg-white p-4 rounded-xl shadow-sm">
+                        <i data-lucide="shield-check" class="text-teal-500"></i>
+                        <span class="text-slate-700 font-medium text-sm">Base de Datos Segura</span>
+                    </div>
+                    <div class="flex items-center space-x-3 bg-white p-4 rounded-xl shadow-sm">
+                        <i data-lucide="pie-chart" class="text-teal-500"></i>
+                        <span class="text-slate-700 font-medium text-sm">Control de Caja</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section id="productos" class="py-24 bg-teal-900 relative overflow-hidden">
+        <!-- Background Blobs -->
+        <div class="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none">
+            <div class="absolute top-10 right-10 w-64 h-64 bg-teal-400 rounded-full blur-3xl animate-blob"></div>
+            <div class="absolute bottom-10 left-10 w-96 h-96 bg-cyan-400 rounded-full blur-3xl animate-blob" style="animation-delay: 2s;"></div>
+        </div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="mb-16 text-center text-white reveal">
+                <h2 class="text-3xl font-bold sm:text-4xl">Elige la Mejor Versión</h2>
+                <p class="mt-4 max-w-2xl mx-auto text-teal-100">Una inversión única para organizar tu negocio de por vida.</p>
+            </div>
+
+            <div class="flex justify-center reveal">
+                <div class="w-full max-w-lg bg-white rounded-3xl shadow-2xl overflow-hidden transform hover:scale-105 transition-transform duration-300">
+                    <div class="bg-teal-600 p-6 text-center text-white relative">
+                        <div class="absolute top-4 right-4 bg-yellow-400 text-teal-900 text-xs font-bold px-2 py-1 rounded-md uppercase">Más Vendido</div>
+                        <h3 class="text-2xl font-bold">VERSIÓN PROFESIONAL</h3>
+                        <div class="mt-4 flex items-baseline justify-center">
+                            <span class="text-5xl font-extrabold">S/ 899</span>
+                            <span class="text-teal-100 ml-1 text-sm">/ pago único</span>
+                        </div>
+                        <p class="mt-2 text-teal-100 text-sm">Para control total de ventas y empleados</p>
+                    </div>
+
+                    <div class="p-8">
+                        <ul class="space-y-4 mb-8">
+                            <li class="flex items-start"><i data-lucide="check" class="h-5 w-5 text-teal-500 mr-3"></i> <span class="text-slate-600 text-sm">Licencia de por vida (Sin pagos mensuales)</span></li>
+                            <li class="flex items-start"><i data-lucide="check" class="h-5 w-5 text-teal-500 mr-3"></i> <span class="text-slate-600 text-sm">Instalación remota incluida</span></li>
+                            <li class="flex items-start"><i data-lucide="check" class="h-5 w-5 text-teal-500 mr-3"></i> <span class="text-slate-600 text-sm">2 Capacitaciones personalizadas</span></li>
+                            <li class="flex items-start"><i data-lucide="check" class="h-5 w-5 text-teal-500 mr-3"></i> <span class="text-slate-600 text-sm">Gestión de Pacientes y Médicos</span></li>
+                            <li class="flex items-start"><i data-lucide="check" class="h-5 w-5 text-teal-500 mr-3"></i> <span class="text-slate-600 text-sm">Control de Inventario y Stock</span></li>
+                            <li class="flex items-start"><i data-lucide="check" class="h-5 w-5 text-teal-500 mr-3"></i> <span class="text-slate-600 text-sm">Backup en Google Drive / Yahoo</span></li>
+                        </ul>
+
+                        <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 mb-4">
+                            <h4 class="flex items-center text-slate-800 font-bold mb-2 text-sm"><i data-lucide="monitor" class="w-4 h-4 mr-2"></i> Requisitos del PC:</h4>
+                            <p class="text-xs text-slate-500">Windows 10 o 11, mínimo 8GB de RAM. PC de escritorio o Laptop.</p>
+                        </div>
+
+                        <div class="bg-yellow-50 p-3 rounded-lg border border-yellow-200 flex items-start">
+                            <i data-lucide="info" class="w-5 h-5 text-yellow-600 mr-2 flex-shrink-0 mt-0.5"></i>
+                            <p class="text-xs text-yellow-800"><strong>Importante:</strong> Sistema de registro manual. No se conecta a equipos automatizados ni directo a SUNAT.</p>
+                        </div>
+
+                        <a href="https://wa.me/51933126365?text=Hola,%20me%20interesa%20la%20Versión%20Profesional%20del%20sistema" target="_blank" class="mt-8 block w-full bg-slate-900 text-white text-center py-4 rounded-xl font-bold hover:bg-teal-600 transition-colors shadow-lg">
+                            Solicitar Cotización
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="nosotros" class="py-24 bg-white overflow-hidden">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="lg:grid lg:grid-cols-2 lg:gap-16 items-center">
+                <div class="reveal">
+                    <span class="inline-block py-1 px-3 rounded-full bg-slate-100 text-slate-600 text-sm font-semibold mb-4">Sobre RIOSOFTPERU</span>
+                    <h2 class="text-3xl font-extrabold text-slate-900 mb-6">Empoderando a los Laboratorios de Latinoamérica</h2>
+                    <p class="text-lg text-slate-600 mb-6">Bienvenidos a <strong>LATINOLAB 2025</strong>. Nuestro sistema está diseñado para transformar la forma en que los laboratorios pequeños y medianos trabajan.</p>
+                    <p class="text-slate-600 mb-8 leading-relaxed">Ayudamos a emprendedores listos para abrir su negocio con éxito. Organizamos y controlamos tu laboratorio para que mantengas todo en orden.</p>
+                    
+                    <div class="space-y-4">
+                        <div class="flex items-start">
+                            <div class="bg-teal-100 p-2 rounded-lg mr-4"><i data-lucide="globe" class="text-teal-600"></i></div>
+                            <div>
+                                <h4 class="font-bold text-slate-900">Presencia Internacional</h4>
+                                <p class="text-sm text-slate-500">Clientes en Perú y toda Latinoamérica.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="bg-teal-100 p-2 rounded-lg mr-4"><i data-lucide="shield" class="text-teal-600"></i></div>
+                            <div>
+                                <h4 class="font-bold text-slate-900">Seguridad y Confianza</h4>
+                                <p class="text-sm text-slate-500">Respaldo ante inconvenientes.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="bg-teal-100 p-2 rounded-lg mr-4"><i data-lucide="smile" class="text-teal-600"></i></div>
+                            <div>
+                                <h4 class="font-bold text-slate-900">Capacitación Incluida</h4>
+                                <p class="text-sm text-slate-500">Te enseñamos a usar el sistema paso a paso.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="relative mt-12 lg:mt-0 reveal" style="transition-delay: 200ms;">
+                    <div class="absolute inset-0 bg-gradient-to-tr from-teal-200 to-slate-200 rounded-3xl transform rotate-3 scale-105 -z-10"></div>
+                    <img class="relative rounded-2xl shadow-xl w-full object-cover border-4 border-white" src="https://images.unsplash.com/photo-1573164713714-d95e436ab8d6?q=80&w=600&auto=format&fit=crop" alt="Soporte Riosoft">
+                    <div class="absolute -bottom-6 -left-6 bg-white p-4 rounded-xl shadow-lg border-l-4 border-teal-500 max-w-xs">
+                        <p class="text-sm font-bold text-slate-800">"El sistema se adapta perfectamente a cualquier país de Latinoamérica."</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contacto" class="py-24 bg-slate-900 text-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16 reveal">
+                <h2 class="text-3xl font-bold sm:text-4xl">¿Listo para comenzar?</h2>
+                <p class="mt-4 text-slate-400">Contáctanos hoy mismo y da el primer paso.</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                <!-- Info -->
+                <div class="reveal bg-slate-800 p-8 rounded-2xl shadow-xl border border-slate-700">
+                    <h3 class="text-2xl font-bold mb-6 text-teal-400">Datos de Contacto</h3>
+                    <div class="space-y-8">
+                        <div class="flex items-center">
+                            <div class="bg-teal-600/20 p-3 rounded-full mr-4"><i data-lucide="phone" class="text-teal-400"></i></div>
+                            <div>
+                                <p class="text-xs text-slate-400 uppercase tracking-wide">WhatsApp Oficial</p>
+                                <a href="https://wa.me/51933126365" class="text-xl font-bold hover:text-teal-400 transition-colors">+51 933 126 365</a>
+                            </div>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="bg-teal-600/20 p-3 rounded-full mr-4"><i data-lucide="mail" class="text-teal-400"></i></div>
+                            <div>
+                                <p class="text-xs text-slate-400 uppercase tracking-wide">Correo Electrónico</p>
+                                <p class="text-lg font-medium">riosoftperu@gmail.com</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="bg-teal-600/20 p-3 rounded-full mr-4"><i data-lucide="map-pin" class="text-teal-400"></i></div>
+                            <div>
+                                <p class="text-xs text-slate-400 uppercase tracking-wide">Ubicación</p>
+                                <p class="text-lg font-medium">Lima, Perú (Atención a toda Latam)</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-10 pt-8 border-t border-slate-700">
+                        <h4 class="font-bold mb-4 flex items-center"><i data-lucide="dollar-sign" class="w-5 h-5 mr-2 text-teal-400"></i> Medios de Pago Disponibles</h4>
+                        <div class="grid grid-cols-2 gap-4 text-sm text-slate-300">
+                            <ul class="space-y-1">
+                                <li class="font-bold text-white mb-2">Perú:</li>
+                                <li>• BCP / BBVA / Interbank</li>
+                                <li>• Yape / Plin</li>
+                            </ul>
+                            <ul class="space-y-1">
+                                <li class="font-bold text-white mb-2">Extranjero:</li>
+                                <li>• PayPal</li>
+                                <li>• Western Union</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Process -->
+                <div class="reveal bg-white text-slate-900 p-8 rounded-2xl shadow-xl" style="transition-delay: 200ms;">
+                    <h3 class="text-2xl font-bold mb-6 text-slate-800">Proceso de Compra</h3>
+                    <div class="relative border-l-2 border-teal-200 ml-3 space-y-8 pb-4">
+                        <div class="relative pl-8">
+                            <div class="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-teal-500 border-2 border-white"></div>
+                            <h4 class="font-bold text-lg">1. Solicita Cotización</h4>
+                            <p class="text-slate-600 text-sm">Escríbenos al WhatsApp para recibir la proforma.</p>
+                        </div>
+                        <div class="relative pl-8">
+                            <div class="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-teal-500 border-2 border-white"></div>
+                            <h4 class="font-bold text-lg">2. Abono del 50%</h4>
+                            <p class="text-slate-600 text-sm">Pago inicial y envío de logotipo.</p>
+                        </div>
+                        <div class="relative pl-8">
+                            <div class="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-teal-500 border-2 border-white"></div>
+                            <h4 class="font-bold text-lg">3. Instalación Remota</h4>
+                            <p class="text-slate-600 text-sm">Vía AnyDesk/RustDesk en tu PC.</p>
+                        </div>
+                        <div class="relative pl-8">
+                            <div class="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-teal-500 border-2 border-white"></div>
+                            <h4 class="font-bold text-lg">4. Capacitación y Final</h4>
+                            <p class="text-slate-600 text-sm">2 sesiones y pago del saldo restante.</p>
+                        </div>
+                    </div>
+                    <div class="mt-8">
+                        <a href="https://wa.me/51933126365" target="_blank" class="block w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg text-center transition-colors shadow-lg">
+                            Iniciar Compra por WhatsApp
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-slate-950 text-slate-400 py-12 border-t border-slate-900">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-6">
+                <div class="text-center md:text-left">
+                    <div class="flex items-center justify-center md:justify-start space-x-2 mb-2">
+                        <i data-lucide="laptop" class="text-teal-600"></i>
+                        <span class="text-xl font-bold text-white">RIOSOFT<span class="text-teal-600">PERU</span></span>
+                    </div>
+                    <p class="text-sm">Tu socio tecnológico para laboratorios clínicos.</p>
+                    <p class="text-xs mt-1 text-slate-600">© 2025 Todos los derechos reservados.</p>
+                </div>
+                <div class="flex space-x-6">
+                    <a href="https://www.facebook.com/riofriosoftperu" target="_blank" class="hover:text-white transition-colors flex flex-col items-center"><i data-lucide="facebook"></i><span class="text-[10px] mt-1">Face</span></a>
+                    <a href="https://www.tiktok.com/@riosoftperu" target="_blank" class="hover:text-white transition-colors flex flex-col items-center"><i data-lucide="video"></i><span class="text-[10px] mt-1">TikTok</span></a>
+                    <a href="https://www.youtube.com/@riofriosoftperu" target="_blank" class="hover:text-white transition-colors flex flex-col items-center"><i data-lucide="youtube"></i><span class="text-[10px] mt-1">YouTube</span></a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- AI Chat Widget -->
+    <div id="ai-widget" class="fixed bottom-6 right-6 z-50 flex flex-col items-end font-sans">
+        <!-- Chat Window -->
+        <div id="chat-window" class="bg-white rounded-2xl shadow-2xl w-80 sm:w-96 mb-4 overflow-hidden transition-all duration-300 origin-bottom-right flex flex-col border border-slate-200 h-0 opacity-0 scale-0">
+            <!-- Header -->
+            <div class="bg-teal-600 p-4 flex justify-between items-center text-white">
+                <div class="flex items-center space-x-2">
+                    <div class="bg-white/20 p-1.5 rounded-lg"><i data-lucide="bot" class="w-5 h-5"></i></div>
+                    <div>
+                        <h3 class="font-bold text-sm">Ventas Riosoft Perú</h3>
+                        <p class="text-xs text-teal-100 flex items-center">
+                            <span class="w-2 h-2 bg-green-400 rounded-full mr-1 animate-pulse"></span> En línea (Gemini AI)
+                        </p>
+                    </div>
+                </div>
+                <button id="close-chat" class="hover:bg-white/20 p-1 rounded transition-colors"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            
+            <!-- Messages -->
+            <div id="chat-messages" class="flex-1 p-4 overflow-y-auto bg-slate-50 no-scrollbar space-y-4">
+                <div class="flex justify-start">
+                    <div class="max-w-[85%] p-3 rounded-2xl text-sm bg-white border border-slate-200 text-slate-700 rounded-bl-none shadow-sm">
+                        ¡Hola! Soy el asistente de Riosoft. ¿Te interesa saber cómo funciona nuestro software sin internet y de pago único?
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Input -->
+            <div class="p-3 bg-white border-t border-slate-100">
+                <div class="flex items-center bg-slate-100 rounded-full px-4 py-2">
+                    <input type="text" id="chat-input" class="flex-1 bg-transparent border-none outline-none text-sm text-slate-800 placeholder-slate-400" placeholder="Pregunta precios, requisitos...">
+                    <button id="send-btn" class="ml-2 p-1.5 rounded-full text-teal-600 hover:bg-teal-100 transition-colors"><i data-lucide="send" class="w-4 h-4"></i></button>
+                </div>
+                <div class="text-center mt-1"><span class="text-[10px] text-slate-400">Powered by Google Gemini</span></div>
+            </div>
+        </div>
+
+        <!-- Toggle Button -->
+        <button id="toggle-chat" class="bg-teal-600 hover:bg-teal-700 text-white p-4 rounded-full shadow-lg transition-all transform hover:scale-110 flex items-center justify-center">
+            <i data-lucide="message-square" class="w-7 h-7"></i>
+        </button>
+    </div>
+
+    <!-- MAIN SCRIPT (Module for Gemini) -->
+    <script type="module">
+        import { GoogleGenAI } from "@google/genai";
+
+        // --- Icons ---
+        lucide.createIcons();
+
+        // --- Navbar Scroll Effect ---
+        const navbar = document.getElementById('navbar');
+        const navLogoText = document.getElementById('nav-logo-text');
+        const navSubText = document.getElementById('nav-sub-text');
+        const navLinks = document.querySelectorAll('.nav-link');
+        const menuIcon = document.getElementById('menu-icon');
+
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) {
+                navbar.classList.remove('bg-transparent', 'py-6');
+                navbar.classList.add('bg-white/95', 'backdrop-blur-md', 'shadow-md', 'py-4');
+                navLogoText.classList.replace('text-white', 'text-slate-900');
+                navSubText.classList.replace('text-slate-200', 'text-slate-500');
+                menuIcon.parentElement.classList.replace('text-white', 'text-slate-900');
+                navLinks.forEach(link => {
+                    link.classList.remove('text-slate-100', 'hover:text-white');
+                    link.classList.add('text-slate-700', 'hover:text-teal-600');
+                });
+            } else {
+                navbar.classList.add('bg-transparent', 'py-6');
+                navbar.classList.remove('bg-white/95', 'backdrop-blur-md', 'shadow-md', 'py-4');
+                navLogoText.classList.replace('text-slate-900', 'text-white');
+                navSubText.classList.replace('text-slate-500', 'text-slate-200');
+                menuIcon.parentElement.classList.replace('text-slate-900', 'text-white');
+                navLinks.forEach(link => {
+                    link.classList.add('text-slate-100', 'hover:text-white');
+                    link.classList.remove('text-slate-700', 'hover:text-teal-600');
+                });
+            }
+        });
+
+        // --- Mobile Menu ---
+        const mobileBtn = document.getElementById('mobile-menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const mobileLinks = document.querySelectorAll('.mobile-link');
+
+        mobileBtn.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        mobileLinks.forEach(link => {
+            link.addEventListener('click', () => mobileMenu.classList.add('hidden'));
+        });
+
+        // --- Scroll Reveal Animation ---
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('active');
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+        // --- AI Chat Logic ---
+        const chatWindow = document.getElementById('chat-window');
+        const toggleChat = document.getElementById('toggle-chat');
+        const closeChat = document.getElementById('close-chat');
+        const chatMessages = document.getElementById('chat-messages');
+        const chatInput = document.getElementById('chat-input');
+        const sendBtn = document.getElementById('send-btn');
+        let isChatOpen = false;
+
+        function toggleChatVisibility() {
+            isChatOpen = !isChatOpen;
+            if (isChatOpen) {
+                chatWindow.classList.remove('h-0', 'opacity-0', 'scale-0');
+                chatWindow.classList.add('h-[500px]', 'opacity-100', 'scale-100');
+                toggleChat.classList.add('hidden');
+            } else {
+                chatWindow.classList.add('h-0', 'opacity-0', 'scale-0');
+                chatWindow.classList.remove('h-[500px]', 'opacity-100', 'scale-100');
+                setTimeout(() => toggleChat.classList.remove('hidden'), 300);
+            }
+        }
+
+        toggleChat.addEventListener('click', toggleChatVisibility);
+        closeChat.addEventListener('click', toggleChatVisibility);
+
+        // History handling
+        const history = [
+            { role: 'model', text: '¡Hola! Soy el asistente de Riosoft. ¿Te interesa saber cómo funciona nuestro software sin internet y de pago único?' }
+        ];
+
+        function addMessage(role, text) {
+            const div = document.createElement('div');
+            div.className = `flex ${role === 'user' ? 'justify-end' : 'justify-start'}`;
+            
+            const bubble = document.createElement('div');
+            bubble.className = `max-w-[85%] p-3 rounded-2xl text-sm ${role === 'user' ? 'bg-teal-600 text-white rounded-br-none' : 'bg-white border border-slate-200 text-slate-700 rounded-bl-none shadow-sm'}`;
+            bubble.textContent = text;
+            
+            div.appendChild(bubble);
+            chatMessages.appendChild(div);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function showLoading() {
+            const div = document.createElement('div');
+            div.id = 'loading-msg';
+            div.className = 'flex justify-start';
+            div.innerHTML = `
+                <div class="bg-white border border-slate-200 p-3 rounded-2xl rounded-bl-none shadow-sm flex items-center space-x-2">
+                    <i data-lucide="loader-2" class="w-4 h-4 animate-spin text-teal-600"></i>
+                    <span class="text-xs text-slate-400">Escribiendo...</span>
+                </div>`;
+            chatMessages.appendChild(div);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            lucide.createIcons(); // Refresh icons for the loader
+        }
+
+        function removeLoading() {
+            const el = document.getElementById('loading-msg');
+            if (el) el.remove();
+        }
+
+        async function handleSendMessage() {
+            const text = chatInput.value.trim();
+            if (!text) return;
+
+            addMessage('user', text);
+            history.push({ role: 'user', text: text });
+            chatInput.value = '';
+            showLoading();
+
+            try {
+                // Initialize GenAI
+                const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+                
+                // Since this is vanilla JS single file, we recreate the prompt here
+                const systemInstruction = `Eres el asistente de ventas virtual de 'RIOSOFTPERU', creadores del software 'LATINOLAB 2025'. 
+                Objetivo: Vender software a laboratorios.
+                DATOS: Precio S/ 899 (Pago Único). Sin mensualidades. Sin Internet.
+                Requisitos: Windows 10/11, 8GB RAM.
+                Instalación: Remota (AnyDesk).
+                IMPORTANTE: No tiene interfaz a equipos ni SUNAT directo.
+                CONTACTO: +51 933 126 365.
+                Estilo: Profesional, persuasivo, usa emojis.`;
+
+                const chat = ai.chats.create({
+                    model: 'gemini-2.5-flash',
+                    config: { systemInstruction }
+                });
+
+                // Send the last message. Ideally we would sync history, but for this demo 
+                // we'll rely on the context of the new session or send the message directly.
+                // To keep it simple in this architecture, we send the new message.
+                const result = await chat.sendMessage({ message: text });
+                const response = result.text;
+
+                removeLoading();
+                addMessage('model', response);
+                history.push({ role: 'model', text: response });
+
+            } catch (error) {
+                console.error(error);
+                removeLoading();
+                addMessage('model', "Lo siento, tuve un problema de conexión. Por favor escríbenos al WhatsApp.");
+            }
+        }
+
+        sendBtn.addEventListener('click', handleSendMessage);
+        chatInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') handleSendMessage();
+        });
+
+    </script>
+<script type="module" src="/index.tsx"></script>
+</body>
+</html>
